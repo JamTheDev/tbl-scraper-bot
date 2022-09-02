@@ -1,9 +1,19 @@
 import "reflect-metadata";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 import { dirname, importx } from "@discordx/importer";
-import type { Interaction, Message } from "discord.js";
+import { ActivityType, Interaction, Message } from "discord.js";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
+import express from "express";
+import createBrowserInstance from "./scraper/browser.js";
+import VisitWebsiteAction from "./scraper/actions/visit-website-action.js";
+
+const app: express.Application = express();
+
+const port: number = 3000;
 
 export const bot = new Client({
   // To only use global commands (use @Guild for specific guild command), comment this line
@@ -15,7 +25,7 @@ export const bot = new Client({
     IntentsBitField.Flags.GuildMembers,
     IntentsBitField.Flags.GuildMessages,
     IntentsBitField.Flags.GuildMessageReactions,
-    IntentsBitField.Flags.GuildVoiceStates,
+    IntentsBitField.Flags.GuildVoiceStates
   ],
 
   // Debug logs are disabled in silent mode
@@ -43,6 +53,34 @@ bot.once("ready", async () => {
   //  );
 
   console.log("Bot started");
+
+  console.log("Getting site ping");
+    const browser = await createBrowserInstance();
+
+    const response: number = await VisitWebsiteAction.action(browser);
+    if (response >= -1)
+      bot.user?.setActivity(
+        `UMak TBL - ${response / 1000}s response time.`,
+      );
+
+      await browser?.close();
+
+      console.log("Browser closed.");
+
+  setTimeout(async () => {
+    console.log("Getting site ping");
+    const browser = await createBrowserInstance();
+
+    const response: number = await VisitWebsiteAction.action(browser);
+    if (response <= -1)
+      bot.user?.setActivity(
+        `UMak TBL - ${response / 1000}s response time.`,
+      );
+
+      await browser?.close();
+
+      console.log("Browser closed.");
+  }, 1800000)
 });
 
 bot.on("interactionCreate", (interaction: Interaction) => {
@@ -70,4 +108,12 @@ async function run() {
   await bot.login(process.env.BOT_TOKEN);
 }
 
-run();
+app.get("/", (req, res) => {
+  
+})
+
+app.listen(port,() => {
+  run();
+  console.log(`listening to port ${port} and discord bot started.`);
+})
+
