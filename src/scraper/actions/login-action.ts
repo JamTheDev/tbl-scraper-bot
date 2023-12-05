@@ -21,8 +21,8 @@ const LoginAction: ScraperTemplate = {
             await page.waitForSelector('#password');
             await page.waitForSelector('#loginbtn');
 
-            await page.type('#username', 'a12240987');
-            await page.type('#password', 'JamJamPlayz990');
+            await page.type('#username', 'SECRET');
+            await page.type('#password', 'SECRET');
 
             // login & authenticate
             await page.click('#loginbtn');
